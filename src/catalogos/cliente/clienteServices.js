@@ -8,4 +8,4 @@ export const post = (cliente) => axios.post('Cliente/', cliente);
 
 export const put = (cliente) => axios.put(`Cliente/${cliente?.id}`, cliente);
 
-export const remove = (id) => axios.put(`Cliente/${id}`);
+export const remove = (id) => axios.delete(`Cliente/${id}`);

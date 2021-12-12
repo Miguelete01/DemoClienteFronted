@@ -10,6 +10,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Swal from 'sweetalert2'
 
 const defaultValues = {
     nombre: '',
@@ -23,18 +24,64 @@ const ClienteLista = (props) => {
     const { handleSubmit, control, reset } = useForm({ defaultValues });
     const [dataTable, setDataTable] = useState([]);
 
+    const getLista = () => {
+      setDataTable([]);
+      apiCliente.getAll().then(res => {   
+        setDataTable(res.data);
+      })
+    }
+
     useEffect(() =>{        
-        apiCliente.getAll().then(res => {   
-            setDataTable(res.data);
-        })
+        getLista();
     }, []);
 
     const onSubmit = (data) => {
-        console.log('data: ', data);
+      if (data?.id) {
+        apiCliente.put(data).then( res => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Confirmación',
+            text: 'Los datos se han guardado con éxito'
+          });
+          getLista();
+          reset(defaultValues);
+        });
+      } 
+      else 
+      {
+        apiCliente.post(data).then(res => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Confirmación',
+            text: 'Los datos se han guardado con éxito'
+          });
+          getLista();
+          reset(defaultValues);
+        });
+      }
     };
 
     const handleDelete = (row) => {
-      console.log(row, 'eliminado');
+      console.log("Row: ", row);
+      Swal.fire({
+        icon: 'success',
+        title: 'Confirmación',
+        text: 'Los cambios no se podrán recuperar',
+        showDenyButton: true,
+        showCancelButton: true,
+      }).then( result => {
+        if (result.value){
+          apiCliente.remove(row.id).then(res => {
+            Swal.fire('El cliente fue eliminado!', '', 'success')
+            getLista();
+          });
+        }
+        else if (result.dismiss === 'cancel')
+        {
+          Swal.fire('Cancelado!', '', 'error')
+        }
+
+      });
     }
 
     return (
@@ -113,7 +160,7 @@ const ClienteLista = (props) => {
                     )}            
                 />
             </div>
-            <Button type="submit" variant="contained">Contained</Button>            
+            <Button type="submit" variant="contained">Guadar</Button>            
             </form>
             <h2>Lista</h2>
             <div className="table">
